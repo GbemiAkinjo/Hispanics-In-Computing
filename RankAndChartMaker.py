@@ -5,7 +5,7 @@ import seaborn as sns
 from matplotlib.ticker import MaxNLocator
 
 # Load the CSV file from the current working directory
-all_universities_df = pd.read_csv('2022_HSI_universities.csv')
+all_universities_df = pd.read_csv('HSI_universities.csv')
 
 # Remove any single quotes around the CIP_Code values
 all_universities_df['CIP_Code'] = all_universities_df['CIP_Code'].astype(str).str.replace("'", "")
@@ -36,7 +36,7 @@ chart_dir = 'CIP_Award_Level_Charts'
 os.makedirs(chart_dir, exist_ok=True)
 
 # Create a text file to store insufficient data information
-not_enough_file = os.path.join(chart_dir, "Insufficient_Amount_of_Programs.txt")
+not_enough_file = os.path.join(chart_dir, "Insufficient_Amount_of_Universities.txt")
 with open(not_enough_file, "w") as f:
     f.write("CIP Codes and Award Levels with Insufficient Universities:\n")
     f.write("=" * 60 + "\n\n")
@@ -68,7 +68,11 @@ for (cip_code, award_level), group in grouped_by_cip_award:
     os.makedirs(cip_dir, exist_ok=True)
     
     # Create a bar chart for the top 10 universities based on the Total Hispanic Student Population
-    top_10_universities = group.nlargest(10, 'Total Hispanic Student Population')
+    # If multiple universities have the same rank, sort alphabetically by 'University Name'
+    top_10_universities = group.sort_values(
+        by=['Total Hispanic Student Population', 'University Name'], 
+        ascending=[False, True]
+    ).head(10)
     
     # Set up the bar plot with improved aesthetics
     plt.figure(figsize=(10, 6))
